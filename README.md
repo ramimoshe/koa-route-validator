@@ -6,8 +6,8 @@ koa-route middleware that validate request/response for each route using Joi
 npm i koa-route-validator
 ```
 
-### How to add koa-route-validator to koa-route
-#### Using 
+### How to use
+#### Using koa-route-validator
 ```js
 const RouteValidator = require('koa-route-validator');
 const rv = new RouteValidator();
@@ -15,7 +15,7 @@ rv.on('warn', console.warn);
 rv.create({/* options */}); // returns koa-router middleware
 ```
 
-#### Example with koa-router
+#### Example of using koa-route-validator with koa-router
 ```js
 const RouteValidator = require('koa-route-validator');
 
