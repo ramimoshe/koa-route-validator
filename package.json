@@ -1,0 +1,24 @@
+{
+  "name": "koa-route-validator",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage --config jest.config.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramimoshe/koa-route-validator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ramimoshe/koa-route-validator/issues"
+  },
+  "homepage": "https://github.com/ramimoshe/koa-route-validator#readme",
+  "dependencies": {
+    "jest": "^23.6.0",
+    "joi": "^14.3.0",
+    "lodash": "^4.17.11"
+  }
+}
