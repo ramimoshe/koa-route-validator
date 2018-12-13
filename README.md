@@ -7,6 +7,15 @@ npm i koa-route-validator
 ```
 
 ### How to add koa-route-validator to koa-route
+#### Using 
+```js
+const RouteValidator = require('koa-route-validator');
+const rv = new RouteValidator();
+rv.on('warn', console.warn);
+rv.create({/* options */}); // returns koa-router middleware
+```
+
+#### Example with koa-router
 ```js
 const RouteValidator = require('koa-route-validator');
 
