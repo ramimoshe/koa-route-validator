@@ -18,7 +18,4 @@ describe('RouteValidator', () => {
             done();
         }
     });
-
-    test('create - invalid request params - should return bad request', (done) => {
-    });
 });

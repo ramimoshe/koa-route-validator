@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/ramimoshe/koa-route-validator#readme",
   "dependencies": {
-    "jest": "^23.6.0",
     "joi": "^14.3.0",
     "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "jest": "^23.6.0"
   }
 }
