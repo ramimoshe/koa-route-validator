@@ -22,15 +22,17 @@ class RouteValidator extends EventEmitter {
 
             await next();
 
-            const responseValidationResult = this._validateResponse(ctx, validationObject.responseSchema);
-            if (!_.isEmpty(responseValidationResult)) {
-                this.emit('warn', {
-                    path: _.get('matched[0].path')(ctx),
-                    responseValidationResult
-                });
-                ctx.status = 500;
-                ctx.body   = {};
-                return;
+            if (ctx.response.status === 200) {
+                const responseValidationResult = this._validateResponse(ctx, validationObject.responseSchema);
+                if (!_.isEmpty(responseValidationResult)) {
+                    this.emit('warn', {
+                        path: _.get('matched[0].path')(ctx),
+                        responseValidationResult
+                    });
+                    ctx.status = 500;
+                    ctx.body   = {};
+                    return;
+                }
             }
         };
     }
