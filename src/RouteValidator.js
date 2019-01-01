@@ -16,9 +16,11 @@ class RouteValidator extends EventEmitter {
 
         return async (ctx, next) => {
             const requestValidationResult = this._validateRequest(ctx, validationObject.requestSchema);
-            if (!_.isEmpty(requestValidationResult)) {
-                return ctx.throw(400, JSON.stringify({ validationResults: requestValidationResult }));
+            if (this._hasError(requestValidationResult)) {
+                return ctx.throw(400, JSON.stringify({ validationResults: this._extractErrors(requestValidationResult) }));
             }
+
+            ctx.state.rv = this._getJoiValues(requestValidationResult);
 
             await next();
 
@@ -37,15 +39,37 @@ class RouteValidator extends EventEmitter {
         };
     }
 
-    _validateRequest(ctx, requestSchema = {}) {
-        const validationResult = {
-            body       : this._validate(ctx.request.body, requestSchema.body || Joi.any()),
-            headers    : this._validate(ctx.request.headers, requestSchema.headers || Joi.any()),
-            params     : this._validate(ctx.params, requestSchema.params || Joi.any()),
-            queryString: this._validate(ctx.request.query, requestSchema.queryString || Joi.any())
-        };
+    _getJoiValues(validationResults) {
+        return reduce((result, validationResult, key) => {
+            result[key] = validationResult.value;
 
-        return this._parseResponse(validationResult);
+            return result;
+        }, {})(validationResults);
+    }
+
+    _extractErrors(validationResult) {
+        return reduce((result, value, key) => {
+            if (!_.isEmpty(value.error)) {
+                result.push({
+                    [key]: value.error.message
+                });
+            }
+
+            return result;
+        }, [])(validationResult);
+    }
+
+    _hasError(requestValidationResult) {
+        return _.filter(r => !_.isEmpty(r.error))(requestValidationResult).length > 0;
+    }
+
+    _validateRequest(ctx, requestSchema = {}) {
+        return {
+            body       : Joi.validate(ctx.request.body, requestSchema.body || Joi.any()),
+            headers    : Joi.validate(ctx.request.headers, requestSchema.headers || Joi.any()),
+            params     : Joi.validate(ctx.params, requestSchema.params || Joi.any()),
+            queryString: Joi.validate(ctx.request.query, requestSchema.queryString || Joi.any())
+        };
     }
 
     _validateResponse(ctx, responseSchema = {}) {
@@ -55,21 +79,6 @@ class RouteValidator extends EventEmitter {
         };
 
         return this._parseResponse(validationResult);
-    }
-
-    _parseResponse(validationResult) {
-        const response = reduce((result, value, key) => {
-            if (!_.isEmpty(value)) {
-                result[key] = value;
-            }
-            return result;
-        }, {})(validationResult);
-
-        return response;
-    }
-
-    _validate(data, schema) {
-        return _.get('error.message', Joi.validate(data, schema));
     }
 
     get _inputSchema() {
