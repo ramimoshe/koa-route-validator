@@ -57,12 +57,12 @@ describe('RouteValidator', () => {
         });
 
         const ctx  = {
-            state  : {},
-            request: {
+            state   : {},
+            request : {
                 body: {}
             },
             response: {},
-            throw  : jest.fn()
+            throw   : jest.fn()
         };
         const next = jest.fn();
 
@@ -75,8 +75,29 @@ describe('RouteValidator', () => {
         expect(next.mock.calls.length).toEqual(1);
     });
 
-    test('middleware - valid response - call next & set Joi values', () => {
-        const routeValidator     = new RouteValidator();
+    test('middleware - invalid response - should emit warning with validation result', (done) => {
+
+        let ctx    = {
+            state   : {},
+            request : {
+                body: {}
+            },
+            response: {
+                status: 200,
+            },
+            body    : {
+                doggy: 'flush'
+            },
+            throw   : jest.fn()
+        };
+        const next = jest.fn();
+
+        const routeValidator = new RouteValidator();
+        routeValidator.on('warn', (obj) => {
+            expect(obj.responseValidationResult).toEqual({ body: '"doggy" is not allowed' });
+            done();
+        });
+
         const middlewareFunction = routeValidator.create({
             responseSchema: {
                 body: Joi.object({
@@ -84,23 +105,6 @@ describe('RouteValidator', () => {
                 }).required()
             }
         });
-
-        const ctx  = {
-            state  : {},
-            request: {
-                body: {}
-            },
-            response: {},
-            throw  : jest.fn()
-        };
-        const next = jest.fn();
-
         middlewareFunction(ctx, next);
-
-        expect(ctx.state.rv.body).toEqual({
-            name: 'floss'
-        });
-        expect(Object.keys(ctx.state.rv).length).toEqual(4);
-        expect(next.mock.calls.length).toEqual(1);
     });
 });
