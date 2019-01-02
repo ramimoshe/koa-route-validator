@@ -74,11 +74,16 @@ class RouteValidator extends EventEmitter {
 
     _validateResponse(ctx, responseSchema = {}) {
         const validationResult = {
-            body   : this._validate(ctx.body, responseSchema.body || Joi.any()),
-            headers: this._validate(ctx.headers, responseSchema.headers || Joi.any()),
+            body   : _.get('error.message', Joi.validate(ctx.body, responseSchema.body || Joi.any())),
+            headers: _.get('error.message', Joi.validate(ctx.headers, responseSchema.headers || Joi.any()))
         };
 
-        return this._parseResponse(validationResult);
+        return reduce((result, value, key) => {
+            if (!_.isEmpty(value)) {
+                result[key] = value;
+            }
+            return result;
+        }, {})(validationResult);
     }
 
     get _inputSchema() {

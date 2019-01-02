@@ -74,4 +74,33 @@ describe('RouteValidator', () => {
         expect(Object.keys(ctx.state.rv).length).toEqual(4);
         expect(next.mock.calls.length).toEqual(1);
     });
+
+    test('middleware - valid response - call next & set Joi values', () => {
+        const routeValidator     = new RouteValidator();
+        const middlewareFunction = routeValidator.create({
+            responseSchema: {
+                body: Joi.object({
+                    name: Joi.string().default('floss')
+                }).required()
+            }
+        });
+
+        const ctx  = {
+            state  : {},
+            request: {
+                body: {}
+            },
+            response: {},
+            throw  : jest.fn()
+        };
+        const next = jest.fn();
+
+        middlewareFunction(ctx, next);
+
+        expect(ctx.state.rv.body).toEqual({
+            name: 'floss'
+        });
+        expect(Object.keys(ctx.state.rv).length).toEqual(4);
+        expect(next.mock.calls.length).toEqual(1);
+    });
 });
