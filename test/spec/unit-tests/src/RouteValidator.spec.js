@@ -23,7 +23,7 @@ describe('RouteValidator', () => {
     test('middleware - invalid request.body - return 400 message', () => {
         const routeValidator     = new RouteValidator();
         const middlewareFunction = routeValidator.create({
-            requestSchema: {
+            request: {
                 body: Joi.object({
                     age : Joi.number().required(),
                     name: Joi.string()
@@ -49,7 +49,7 @@ describe('RouteValidator', () => {
     test('middleware - valid request.body - call next & set Joi values', () => {
         const routeValidator     = new RouteValidator();
         const middlewareFunction = routeValidator.create({
-            requestSchema: {
+            request: {
                 body: Joi.object({
                     name: Joi.string().default('floss')
                 }).required()
@@ -99,7 +99,7 @@ describe('RouteValidator', () => {
         });
 
         const middlewareFunction = routeValidator.create({
-            responseSchema: {
+            response: {
                 body: Joi.object({
                     name: Joi.string().default('floss')
                 }).required()
