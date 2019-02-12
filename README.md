@@ -23,7 +23,7 @@ const koaRouter = new KoaRouter();
 const rv = new RouteValidator();
 rv.on('warn', console.warn);
 koaRouter.get('/:id', rv.create({
-    requestSchema: {
+    request: {
         params: Joi.object({})
     }
 }), async (ctx) => {
@@ -34,24 +34,24 @@ koaRouter.get('/:id', rv.create({
 ### Options
 ```json
 {
-    "requestSchema" : {
+    "request" : {
         "body"       : {},
         "headers"    : {},
         "params"     : {},
         "queryString": {}
     },
-    "responseSchema":{ 
+    "response":{ 
         "body"   : {},
         "headers": {}
     }
 }
 ```
-* requestSchema: optional
+* request: optional
   * body: optional - Joi schema for body
   * headers: optional - Joi schema for headers
   * params: optional - Joi schema for params
   * queryString: optional - Joi schema for queryString
-* responseSchema: optional
+* response: optional
   * body: optional - Joi schema for body
   * headers: optional - Joi schema for headers
   

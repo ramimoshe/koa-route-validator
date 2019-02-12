@@ -8,6 +8,21 @@ const reduce = _.reduce.convert({ 'cap': false });
 
 
 class RouteValidator extends EventEmitter {
+    get _inputSchema() {
+        return Joi.object({
+            request : Joi.object({
+                body       : Joi.object().keys({ isJoi: true }).unknown(),
+                headers    : Joi.object().keys({ isJoi: true }).unknown(),
+                params     : Joi.object().keys({ isJoi: true }).unknown(),
+                queryString: Joi.object().keys({ isJoi: true }).unknown()
+            }).optional(),
+            response: Joi.object({
+                body   : Joi.object().keys({ isJoi: true }).unknown(),
+                headers: Joi.object().keys({ isJoi: true }).unknown()
+            }).optional()
+        });
+    }
+
     create(validationObject) {
         const inputValidationResult = Joi.validate(validationObject, this._inputSchema);
         if (inputValidationResult.error) {
@@ -15,7 +30,7 @@ class RouteValidator extends EventEmitter {
         }
 
         return async (ctx, next) => {
-            const requestValidationResult = this._validateRequest(ctx, validationObject.requestSchema);
+            const requestValidationResult = this._validateRequest(ctx, validationObject.request);
             if (this._hasError(requestValidationResult)) {
                 return ctx.throw(400, JSON.stringify({ validationResults: this._extractErrors(requestValidationResult) }));
             }
@@ -25,7 +40,7 @@ class RouteValidator extends EventEmitter {
             await next();
 
             if (ctx.response.status === 200) {
-                const responseValidationResult = this._validateResponse(ctx, validationObject.responseSchema);
+                const responseValidationResult = this._validateResponse(ctx, validationObject.response);
                 if (!_.isEmpty(responseValidationResult)) {
                     this.emit('warn', {
                         path: _.get('matched[0].path')(ctx),
@@ -63,19 +78,19 @@ class RouteValidator extends EventEmitter {
         return _.filter(r => !_.isEmpty(r.error))(requestValidationResult).length > 0;
     }
 
-    _validateRequest(ctx, requestSchema = {}) {
+    _validateRequest(ctx, schema = {}) {
         return {
-            body       : Joi.validate(ctx.request.body, requestSchema.body || Joi.any()),
-            headers    : Joi.validate(ctx.request.headers, requestSchema.headers || Joi.any()),
-            params     : Joi.validate(ctx.params, requestSchema.params || Joi.any()),
-            queryString: Joi.validate(ctx.request.query, requestSchema.queryString || Joi.any())
+            body       : Joi.validate(ctx.request.body, schema.body || Joi.any()),
+            headers    : Joi.validate(ctx.request.headers, schema.headers || Joi.any()),
+            params     : Joi.validate(ctx.params, schema.params || Joi.any()),
+            queryString: Joi.validate(ctx.request.query, schema.queryString || Joi.any())
         };
     }
 
-    _validateResponse(ctx, responseSchema = {}) {
+    _validateResponse(ctx, schema = {}) {
         const validationResult = {
-            body   : _.get('error.message', Joi.validate(ctx.body, responseSchema.body || Joi.any())),
-            headers: _.get('error.message', Joi.validate(ctx.headers, responseSchema.headers || Joi.any()))
+            body   : _.get('error.message', Joi.validate(ctx.body, schema.body || Joi.any())),
+            headers: _.get('error.message', Joi.validate(ctx.headers, schema.headers || Joi.any()))
         };
 
         return reduce((result, value, key) => {
@@ -84,21 +99,6 @@ class RouteValidator extends EventEmitter {
             }
             return result;
         }, {})(validationResult);
-    }
-
-    get _inputSchema() {
-        return Joi.object({
-            requestSchema : Joi.object({
-                body       : Joi.object().keys({ isJoi: true }).unknown(),
-                headers    : Joi.object().keys({ isJoi: true }).unknown(),
-                params     : Joi.object().keys({ isJoi: true }).unknown(),
-                queryString: Joi.object().keys({ isJoi: true }).unknown()
-            }).optional(),
-            responseSchema: Joi.object({
-                body   : Joi.object().keys({ isJoi: true }).unknown(),
-                headers: Joi.object().keys({ isJoi: true }).unknown()
-            }).optional()
-        });
     }
 }
 
