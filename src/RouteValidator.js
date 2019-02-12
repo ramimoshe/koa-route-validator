@@ -8,6 +8,21 @@ const reduce = _.reduce.convert({ 'cap': false });
 
 
 class RouteValidator extends EventEmitter {
+    get _inputSchema() {
+        return Joi.object({
+            request : Joi.object({
+                body       : Joi.object().keys({ isJoi: true }).unknown(),
+                headers    : Joi.object().keys({ isJoi: true }).unknown(),
+                params     : Joi.object().keys({ isJoi: true }).unknown(),
+                queryString: Joi.object().keys({ isJoi: true }).unknown()
+            }).optional(),
+            response: Joi.object({
+                body   : Joi.object().keys({ isJoi: true }).unknown(),
+                headers: Joi.object().keys({ isJoi: true }).unknown()
+            }).optional()
+        });
+    }
+
     create(validationObject) {
         const inputValidationResult = Joi.validate(validationObject, this._inputSchema);
         if (inputValidationResult.error) {
@@ -63,7 +78,7 @@ class RouteValidator extends EventEmitter {
         return _.filter(r => !_.isEmpty(r.error))(requestValidationResult).length > 0;
     }
 
-    _validateRequest(ctx, schema= {}) {
+    _validateRequest(ctx, schema = {}) {
         return {
             body       : Joi.validate(ctx.request.body, schema.body || Joi.any()),
             headers    : Joi.validate(ctx.request.headers, schema.headers || Joi.any()),
@@ -84,21 +99,6 @@ class RouteValidator extends EventEmitter {
             }
             return result;
         }, {})(validationResult);
-    }
-
-    get _inputSchema() {
-        return Joi.object({
-            request: Joi.object({
-                body       : Joi.object().keys({ isJoi: true }).unknown(),
-                headers    : Joi.object().keys({ isJoi: true }).unknown(),
-                params     : Joi.object().keys({ isJoi: true }).unknown(),
-                queryString: Joi.object().keys({ isJoi: true }).unknown()
-            }).optional(),
-            response: Joi.object({
-                body   : Joi.object().keys({ isJoi: true }).unknown(),
-                headers: Joi.object().keys({ isJoi: true }).unknown()
-            }).optional()
-        });
     }
 }
 
