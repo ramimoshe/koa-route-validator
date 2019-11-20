@@ -1,7 +1,7 @@
 'use strict';
 
 const EventEmitter = require('events');
-const Joi          = require('joi');
+const Joi          = require('@hapi/joi');
 const _            = require('lodash/fp');
 
 const reduce = _.reduce.convert({ 'cap': false });
@@ -24,7 +24,7 @@ class RouteValidator extends EventEmitter {
     }
 
     create(validationObject) {
-        const inputValidationResult = Joi.validate(validationObject, this._inputSchema);
+        const inputValidationResult = this._inputSchema.validate(validationObject);
         if (inputValidationResult.error) {
             throw new Error(inputValidationResult.error.message);
         }
@@ -80,17 +80,17 @@ class RouteValidator extends EventEmitter {
 
     _validateRequest(ctx, schema = {}) {
         return {
-            body       : Joi.validate(ctx.request.body, schema.body || Joi.any()),
-            headers    : Joi.validate(ctx.request.headers, schema.headers || Joi.any()),
-            params     : Joi.validate(ctx.params, schema.params || Joi.any()),
-            queryString: Joi.validate(ctx.request.query, schema.queryString || Joi.any())
+            body       : (schema.body || Joi.any()).validate(ctx.request.body),
+            headers    : (schema.headers || Joi.any()).validate(ctx.request.headers),
+            params     : (schema.params || Joi.any()).validate(ctx.params),
+            queryString: (schema.queryString || Joi.any()).validate(ctx.request.query)
         };
     }
 
     _validateResponse(ctx, schema = {}) {
         const validationResult = {
-            body   : _.get('error.message', Joi.validate(ctx.body, schema.body || Joi.any())),
-            headers: _.get('error.message', Joi.validate(ctx.headers, schema.headers || Joi.any()))
+            body   : _.get('error.message', (schema.body || Joi.any()).validate(ctx.body)),
+            headers: _.get('error.message', (schema.headers || Joi.any()).validate(ctx.headers))
         };
 
         return reduce((result, value, key) => {
