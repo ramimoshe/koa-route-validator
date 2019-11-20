@@ -1,6 +1,6 @@
 {
   "name": "koa-route-validator",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/ramimoshe/koa-route-validator#readme",
   "dependencies": {
-    "joi": "^14.3.0",
+    "@hapi/joi": "^16.1.7",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
